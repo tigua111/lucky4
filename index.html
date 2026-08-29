@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>四葉草模擬器</title>
+  <meta name="description" content="測量你們的緣分！找出屬於你們的稀有三葉草。" />
+
+  <!-- 引入 Tailwind CSS -->
+  <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+
+  <!-- 引入 React 與 ReactDOM -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+
+  <!-- 引入 Framer Motion (提供極致流暢的彈簧動畫) -->
+  <script src="https://unpkg.com/framer-motion@11/dist/framer-motion.js"></script>
+
+  <!-- 引入 Babel (讓瀏覽器可以直接解析 React 的 JSX 語法) -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <style>
+    body { margin: 0; padding: 0; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <!-- 主程式碼 -->
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+    const { motion, AnimatePresence } = window.Motion;
+
+    const Clover = ({ leaves = 3, className = "w-16 h-16 text-green-500", ...props }) => {
+      const angles = leaves === 3 ? [0, 95, 265] : [45, 135, 225, 315];
+      
+      return (
+        <motion.svg viewBox="0 0 100 100" className={className} fill="currentColor" xmlns="http://www.w3.org/2000/svg" {...props}>
+          <path d="M48,50 Q40,80 50,95 Q45,80 52,50 Z" />
+          {angles.map(angle => (
+            <g key={angle} transform={`rotate(${angle} 50 50)`}>
+              <path d="M50,50 C25,25 20,0 50,5 C80,0 75,25 50,50 Z" />
+            </g>
+          ))}
+        </motion.svg>
+      );
+    };
+
+    const Petals = () => {
+      return (
+        <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+          {Array.from({ length: 40 }).map((_, i) => (
+            <motion.div
+              key={i}
+              className="absolute top-[-10%] w-4 h-5 bg-pink-300 opacity-60"
+              style={{
+                left: `${Math.random() * 100}%`,
+                borderRadius: '50% 0 50% 50%',
+              }}
+              animate={{
+                y: ['0vh', '110vh'],
+                x: [`${Math.random() * 20 - 10}vw`, `${Math.random() * 40 - 20}vw`],
+                rotate: [0, 360 * (Math.random() > 0.5 ? 1 : -1)],
+              }}
+              transition={{
+                duration: 4 + Math.random() * 6,
+                repeat: Infinity,
+                delay: Math.random() * 5,
+                ease: 'linear',
+              }}
+            />
+          ))}
+        </div>
+      );
+    };
+
+    function App() {
+      const [step, setStep] = useState('inputName');
+      const [crushName, setCrushName] = useState('');
+      const [clovers, setClovers] = useState([]);
+
+      useEffect(() => {
+        setClovers(Array.from({ length: 120 }).map(() => 4));
+      }, []);
+
+      const handleStart = (e) => {
+        e.preventDefault();
+        if (crushName.trim()) {
+          setStep('cloverField');
+        }
+      };
+
+      const handlePickClover = () => {
+        setStep('unboxing');
+        setTimeout(() => {
+          setStep('result');
+        }, 4500);
+      };
+
+      return (
+        <div className="min-h-screen bg-green-50 overflow-hidden relative flex flex-col items-center justify-center font-sans text-green-900">
+          <AnimatePresence mode="wait">
+            
+            {step === 'inputName' && (
+              <motion.div
+                key="inputName"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="flex flex-col items-center max-w-md w-full px-6 z-10"
+              >
+                <motion.div
+                   animate={{ rotate: [0, 10, -10, 0] }}
+                   transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
+                >
+                  <Clover leaves={4} className="w-32 h-32 text-green-600 mb-6 drop-shadow-lg" />
+                </motion.div>
+                <h1 className="text-4xl font-black mb-2 text-center text-green-800 tracking-tight">四葉草模擬器</h1>
+                <p className="text-green-700 mb-10 text-center font-medium text-lg">尋找那朵為你們帶來幸運的四葉草</p>
+                
+                <form onSubmit={handleStart} className="w-full flex flex-col gap-6 bg-white p-8 rounded-3xl shadow-xl shadow-green-900/5">
+                  <div className="flex flex-col gap-3">
+                    <label htmlFor="name" className="text-sm font-bold text-green-800 ml-1">
+                      請輸入你喜歡或暗戀的人的名字：
+                    </label>
+                    <input
+                      id="name"
+                      type="text"
+                      value={crushName}
+                      onChange={(e) => setCrushName(e.target.value)}
+                      placeholder="例如：小明"
+                      className="w-full px-5 py-4 rounded-2xl bg-green-50 border-2 border-green-100 focus:border-green-500 focus:bg-white focus:ring-4 focus:ring-green-500/20 outline-none transition-all text-lg font-medium text-green-900 placeholder:text-green-300"
+                      required
+                      maxLength={20}
+                    />
+                  </div>
+                  <motion.button
+                    type="submit"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-6 rounded-2xl transition-colors shadow-lg shadow-green-600/30 text-lg"
+                  >
+                    開始尋找幸運
+                  </motion.button>
+                </form>
+              </motion.div>
+            )}
+
+            {step === 'cloverField' && (
+              <motion.div
+                key="cloverField"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 flex flex-col items-center justify-center p-4 z-10"
+              >
+                <motion.div 
+                  initial={{ y: -50, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.3 }}
+                  className="absolute top-12 z-20 bg-white/90 backdrop-blur-md px-8 py-4 rounded-full shadow-lg border border-green-100"
+                >
+                  <h2 className="text-xl font-bold text-green-800">挑選一朵感覺最幸運的三葉草吧！</h2>
+                </motion.div>
+                
+                <div className="relative w-full h-[85vh] max-w-5xl mx-auto mt-16 bg-gradient-to-br from-green-300 to-green-400 rounded-[3rem] border-[16px] border-amber-700/80 shadow-[inset_0_10px_30px_rgba(0,0,0,0.2)] overflow-hidden">
+                  <div className="absolute inset-0 opacity-30 bg-[radial-gradient(circle_at_center,_transparent_0%,_#166534_100%)]"></div>
+                  <div className="absolute top-10 left-10 w-40 h-40 bg-green-600/30 rounded-full blur-2xl"></div>
+                  <div className="absolute bottom-20 right-20 w-64 h-64 bg-green-700/20 rounded-full blur-3xl"></div>
+                  <div className="absolute top-1/2 left-1/3 w-32 h-24 bg-stone-400/40 rounded-full blur-sm -rotate-12"></div>
+                  <div className="absolute top-1/3 right-1/4 w-24 h-16 bg-stone-400/40 rounded-full blur-sm rotate-45"></div>
+                  
+                  <div className="absolute inset-2 border-4 border-dashed border-amber-900/20 rounded-[2.5rem]"></div>
+
+                  {clovers.map((leaves, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ scale: 0, rotate: Math.random() * 360 }}
+                      animate={{ scale: 1, rotate: Math.random() * 360 }}
+                      transition={{ delay: Math.random() * 0.8, duration: 0.5, type: 'spring' }}
+                      className="absolute"
+                      style={{
+                        left: `${Math.random() * 88 + 6}%`,
+                        top: `${Math.random() * 88 + 6}%`,
+                      }}
+                    >
+                      <Clover
+                        leaves={leaves}
+                        className="w-10 h-10 md:w-14 md:h-14 text-green-600 hover:text-green-500 filter drop-shadow-[0_4px_4px_rgba(0,0,0,0.2)] cursor-pointer transition-colors"
+                        whileHover={{ scale: 1.4, rotate: Math.random() * 30 - 15, zIndex: 50 }}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={handlePickClover}
+                      />
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
+            {step === 'unboxing' && (
+              <motion.div
+                key="unboxing"
+                className="absolute inset-0 z-50 flex items-center justify-center bg-green-50 overflow-hidden"
+              >
+                <motion.div
+                  initial={{ scale: 0.5, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ delay: 0.5, duration: 1 }}
+                  className="z-10"
+                >
+                  <Clover leaves={3} className="w-56 h-56 md:w-72 md:h-72 text-green-500 drop-shadow-2xl" />
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: [0, 1, 1, 0] }}
+                  transition={{ duration: 2.5, times: [0, 0.2, 0.8, 1] }}
+                  className="absolute z-30 top-1/4 text-3xl font-black text-green-800 text-center px-4 tracking-widest drop-shadow-lg"
+                >
+                  小心翼翼地打開...
+                </motion.div>
+
+                <motion.div
+                  initial={{ x: '0%' }}
+                  animate={{ x: '-100%' }}
+                  transition={{ delay: 2, duration: 2, ease: "easeInOut" }}
+                  className="absolute left-0 top-0 bottom-0 w-1/2 bg-[#f4d0b5] border-r border-black/10 shadow-[15px_0_40px_rgba(0,0,0,0.15)] origin-left flex items-center justify-end pr-2 md:pr-8 z-20"
+                >
+                    <div className="w-4 h-32 md:w-8 md:h-64 bg-[#e6c1a5] rounded-l-full opacity-60 blur-[2px]"></div>
+                </motion.div>
+
+                <motion.div
+                  initial={{ x: '0%' }}
+                  animate={{ x: '100%' }}
+                  transition={{ delay: 2, duration: 2, ease: "easeInOut" }}
+                  className="absolute right-0 top-0 bottom-0 w-1/2 bg-[#f4d0b5] border-l border-black/10 shadow-[-15px_0_40px_rgba(0,0,0,0.15)] origin-right flex items-center justify-start pl-2 md:pl-8 z-20"
+                >
+                    <div className="w-4 h-32 md:w-8 md:h-64 bg-[#e6c1a5] rounded-r-full opacity-60 blur-[2px]"></div>
+                </motion.div>
+              </motion.div>
+            )}
+
+            {step === 'result' && (
+              <motion.div
+                key="result"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="flex flex-col items-center justify-center z-40 max-w-3xl text-center px-6 min-h-screen"
+              >
+                <Petals />
+                
+                <motion.div
+                  animate={{ y: [0, -15, 0], rotate: [0, 5, -5, 0] }}
+                  transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
+                  className="z-10 mt-12"
+                >
+                  <Clover leaves={3} className="w-56 h-56 md:w-64 md:h-64 text-green-500 drop-shadow-[0_20px_50px_rgba(34,197,94,0.3)] mb-10" />
+                </motion.div>
+
+                <motion.h2 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 }}
+                  className="text-4xl md:text-6xl font-black text-green-800 mb-8 z-10"
+                >
+                  是一朵三葉草！
+                </motion.h2>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 1.5 }}
+                  className="bg-white/90 backdrop-blur-xl p-8 md:p-12 rounded-[2rem] shadow-2xl shadow-pink-500/10 border border-pink-100 z-10 max-w-2xl mx-auto"
+                >
+                  <p className="text-xl md:text-2xl font-bold leading-relaxed text-green-900 mb-6">
+                    大家都以為四葉草最珍貴，但其實...<br/>
+                    <span className="inline-block mt-4 text-3xl md:text-4xl font-black text-pink-500 tracking-wide">
+                      三葉草才是極為稀有的！
+                    </span>
+                  </p>
+                  <p className="text-xl md:text-2xl mt-8 font-bold text-green-800 leading-relaxed">
+                    這意味著你和
+                    <span className="inline-block bg-pink-100 text-pink-600 px-4 py-2 rounded-xl mx-2 shadow-inner border border-pink-200">
+                      {crushName}
+                    </span>
+                    一定有著特別的緣分！💖
+                  </p>
+                </motion.div>
+                
+                <motion.button
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 3 }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => {
+                    setCrushName('');
+                    setStep('inputName');
+                  }}
+                  className="mt-12 bg-white text-green-600 font-bold hover:text-green-700 hover:bg-green-50 px-8 py-4 rounded-full shadow-lg transition-all z-10 border border-green-100 relative overflow-hidden"
+                >
+                  重新尋找
+                </motion.button>
+              </motion.div>
+            )}
+
+          </AnimatePresence>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>

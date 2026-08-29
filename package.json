@@ -1,0 +1,13 @@
+{
+  "name": "clover-simulator-static",
+  "version": "1.0.0",
+  "description": "四葉草模擬器",
+  "scripts": {
+    "dev": "serve . -p 3000",
+    "build": "echo 'No build required'"
+  },
+  "devDependencies": {
+    "serve": "^14.2.4"
+  }
+}
+

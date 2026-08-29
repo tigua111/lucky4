@@ -1,0 +1,6 @@
+{
+  "name": "四葉草模擬器",
+  "description": "測量你們的緣分！找出屬於你們的稀有三葉草。",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
